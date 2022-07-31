@@ -1,6 +1,5 @@
 import "./App.css";
 import { useEffect, useState } from "react";
-import styled from "styled-components";
 
 const ProgressBar = ({ currentQuestionIndex, totalQuestionsCount }) => {
   const progressPercentage = (currentQuestionIndex / totalQuestionsCount) * 100;
@@ -16,81 +15,20 @@ const ProgressBar = ({ currentQuestionIndex, totalQuestionsCount }) => {
   );
 };
 
-
 function App() {
   const [currentWord, setCurrentWord] = useState(0);
-
   const [finished, setFinished] = useState(false);
-
-  const [resultFlag, setResultFlag] = useState(false);
-
-  const [viewResult, setViewResult] = useState(false);
-
+  const [isCorrect, setIsCorrect] = useState(false);
   const [haveAnswered, setHaveAnswered] = useState(false);
-
   const [score, setScore] = useState(0);
-
-  
-  
-  // let questions = [
-  //   {
-  //     id: 1,
-  //     word: "slowly",
-  //     pos: "adverb",
-  //   },
-  //   {
-  //     id: 2,
-  //     word: "ride",
-  //     pos: "verb",
-  //   },
-  //   {
-  //     id: 3,
-  //     word: "bus",
-  //     pos: "noun",
-  //   },
-  //   {
-  //     id: 4,
-  //     word: "commute",
-  //     pos: "verb",
-  //   },
-  //   {
-  //     id: 5,
-  //     word: "emissions",
-  //     pos: "noun",
-  //   },
-  //   {
-  //     id: 6,
-  //     word: "walk",
-  //     pos: "verb",
-  //   },
-  //   {
-  //     id: 7,
-  //     word: "fast",
-  //     pos: "adjective",
-  //   },
-  //   {
-  //     id: 8,
-  //     word: "car",
-  //     pos: "noun",
-  //   },
-  //   {
-  //     id: 9,
-  //     word: "crowded",
-  //     pos: "adjective",
-  //   },
-  //   {
-  //     id: 10,
-  //     word: "arrival",
-  //     pos: "noun",
-  //   },
-  // ];
-
-
+  const [selectedIdx, setSelectedIdx] = useState(null);
   const [rank, setRank] = useState(0);
+
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [questions, setQuestions] = useState([]);
-  const [again,setAgain] = useState(false);
+
+  const [again, setAgain] = useState(false);
 
   useEffect(() => {
     if (finished) {
@@ -106,7 +44,7 @@ function App() {
           setRank(response.rank);
         });
     }
-  }, [finished?true:null]);
+  }, [finished ? true : null]);
 
   useEffect(() => {
     fetch("http://localhost:8080/words/")
@@ -115,7 +53,8 @@ function App() {
         (result) => {
           setIsLoaded(true);
           setQuestions(result);
-          setAgain(false)
+          setAgain(false);
+          setSelectedIdx(null);
         },
 
         (error) => {
@@ -123,8 +62,8 @@ function App() {
           setError(error);
         }
       );
-  }, [again?true:null]);
-  
+  }, [again ? true : null]);
+
   let pos = ["adverb", "verb", "adjective", "noun"];
 
   function next() {
@@ -132,7 +71,7 @@ function App() {
     if (currentWord + 1 >= questions.length) {
       setFinished(true);
     }
-    setViewResult(false);
+
     setHaveAnswered(false);
   }
 
@@ -140,19 +79,20 @@ function App() {
     setFinished(false);
     setCurrentWord(0);
     setScore(0);
-    setIsLoaded(false)
+    setIsLoaded(false);
     setAgain(true);
   }
 
   function selectedAnswer(e) {
     setHaveAnswered(true);
+    setSelectedIdx(pos.indexOf(e.currentTarget.getAttribute("value")));
+
     if (e.currentTarget.getAttribute("value") === questions[currentWord].pos) {
-      setResultFlag(true);
+      setIsCorrect(true);
       setScore(score + 1);
     } else {
-      setResultFlag(false);
+      setIsCorrect(false);
     }
-    setViewResult(true);
   }
 
   if (error) {
@@ -160,68 +100,78 @@ function App() {
   } else if (!isLoaded) {
     return <div>Loading...</div>;
   } else {
-    
     return (
       <div className="App">
+
+        <div className="">
+          <h1>Point of Speech</h1>
+          <p>Categorize the words according to their part of speech</p>
+        </div>
+
         {finished ? (
-          <div>
+
+          <div className="card">
+             <div className="container">
             <h1>The student rank is {rank}</h1>
             <button onClick={() => tryAgain()}>Try again</button>
           </div>
+          </div>
+
         ) : (
           <div>
-            <h1>Point of Speech</h1>
-            <h2>Categorize the words according to their part of speech</h2>
 
-            <div>The word {questions[currentWord].word} is </div>
+            <div className="card">
+              <div className="container">
+                <h3>The word {questions[currentWord].word} is </h3>
 
-            <div className="answers">
-              {pos.map((btn, index) => {
-                return (
-                  <div
-                    key={index}
-                    value={btn}
-                    onClick={(e) =>
-                      haveAnswered ? e.preventDefault : selectedAnswer(e)
-                    }
-                    className={`answer ${
-                      haveAnswered
-                        ? resultFlag
-                          ? `correct`
-                          : `incorrect`
-                        : `answer`
-                    }`}
-                  >
-                    {btn}
-                  </div>
-                );
-              })}
+                <div className="answers">
+                  {pos.map((answer, index) => {
+                    return (
+                      <div
+                        key={index}
+                        value={answer}
+                        onClick={(e) =>
+                          haveAnswered ? e.preventDefault : selectedAnswer(e)
+                        }
+                        className={`answer ${
+                          haveAnswered
+                            ? index === selectedIdx
+                              ? isCorrect
+                                ? `correct noHover`
+                                : `incorrect noHover`
+                              : `answer noHover`
+                            : `answer`
+                        }`}
+                      >
+                        {answer}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-
-            {viewResult ? (
-              resultFlag ? (
+                  
+            {/* {haveAnswered ? (
+              isCorrect ? (
                 <div>correct</div>
               ) : (
                 <div>Wrong</div>
               )
             ) : (
               <div></div>
-            )}
-
+            )} */}
+          
             <button onClick={() => next()}>Next word</button>
             <br />
             <ProgressBar
               currentQuestionIndex={currentWord}
               totalQuestionsCount={questions.length}
-            ></ProgressBar>          
+            ></ProgressBar>
           </div>
         )}
       </div>
     );
- 
   }
-
-  
 }
 
 export default App;

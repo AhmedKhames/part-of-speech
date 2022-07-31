@@ -2,6 +2,16 @@ import fs from "fs";
 import { NextFunction, Request, Response } from "express";
 import path from "path";
 
+// Fisher-Yates algorithm
+function shuffle(array:[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+
+
 const getRandomElements = (arr: [], numOfElement: number): [] => {
   let result: [] = [];
   let idx: number = 0,
@@ -23,7 +33,7 @@ const getRandomElements = (arr: [], numOfElement: number): [] => {
     result.push(arr[idx]);
     arr.splice(idx, 1);
   }
-
+  shuffle(result)
   return result;
 };
 
