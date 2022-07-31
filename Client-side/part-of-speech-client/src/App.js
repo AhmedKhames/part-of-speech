@@ -1,5 +1,21 @@
 import "./App.css";
 import { useEffect, useState } from "react";
+import styled from "styled-components";
+
+const ProgressBar = ({ currentQuestionIndex, totalQuestionsCount }) => {
+  const progressPercentage = (currentQuestionIndex / totalQuestionsCount) * 100;
+
+  return (
+    <div className="progressBar">
+      <div className="text">
+        {currentQuestionIndex} answered (
+        {totalQuestionsCount - currentQuestionIndex} remaining)
+      </div>
+      <div className="inner" style={{ width: `${progressPercentage}%` }} />
+    </div>
+  );
+};
+
 
 function App() {
   const [currentWord, setCurrentWord] = useState(0);
@@ -14,6 +30,8 @@ function App() {
 
   const [score, setScore] = useState(0);
 
+  
+  
   // let questions = [
   //   {
   //     id: 1,
@@ -67,9 +85,28 @@ function App() {
   //   },
   // ];
 
+
+  const [rank, setRank] = useState(0);
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [questions, setQuestions] = useState([]);
+  const [again,setAgain] = useState(false);
+
+  useEffect(() => {
+    if (finished) {
+      let totalScore = (score / questions.length) * 100;
+
+      fetch("http://localhost:8080/rank/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ score: totalScore }),
+      })
+        .then((res) => res.json())
+        .then((response) => {
+          setRank(response.rank);
+        });
+    }
+  }, [finished?true:null]);
 
   useEffect(() => {
     fetch("http://localhost:8080/words/")
@@ -78,6 +115,7 @@ function App() {
         (result) => {
           setIsLoaded(true);
           setQuestions(result);
+          setAgain(false)
         },
 
         (error) => {
@@ -85,56 +123,58 @@ function App() {
           setError(error);
         }
       );
-  }, []);
+  }, [again?true:null]);
+  
+  let pos = ["adverb", "verb", "adjective", "noun"];
+
+  function next() {
+    setCurrentWord(currentWord + 1);
+    if (currentWord + 1 >= questions.length) {
+      setFinished(true);
+    }
+    setViewResult(false);
+    setHaveAnswered(false);
+  }
+
+  function tryAgain() {
+    setFinished(false);
+    setCurrentWord(0);
+    setScore(0);
+    setIsLoaded(false)
+    setAgain(true);
+  }
+
+  function selectedAnswer(e) {
+    setHaveAnswered(true);
+    if (e.currentTarget.getAttribute("value") === questions[currentWord].pos) {
+      setResultFlag(true);
+      setScore(score + 1);
+    } else {
+      setResultFlag(false);
+    }
+    setViewResult(true);
+  }
 
   if (error) {
     return <div>Error: {error.message}</div>;
   } else if (!isLoaded) {
     return <div>Loading...</div>;
   } else {
-    let pos = ["adverb", "verb", "adjective", "noun"];
-
-    function next() {
-      setCurrentWord(currentWord + 1);
-      if (currentWord + 1 >= questions.length) {
-        setFinished(true);
-      }
-      setViewResult(false);
-      setHaveAnswered(false);
-    }
-
-    function tryAgain() {
-      setFinished(false);
-      setCurrentWord(0);
-      setScore(0);
-      window.location.reload(false);
-    }
-    function selectedAnswer(e) {
-      setHaveAnswered(true);
-      if (
-        e.currentTarget.getAttribute("value") === questions[currentWord].pos
-      ) {
-        setResultFlag(true);
-        setScore(score + 1);
-      } else {
-        setResultFlag(false);
-      }
-      setViewResult(true);
-    }
-
+    
     return (
       <div className="App">
-        <h1>Point of Speech</h1>
-        <h2>Categorize the words according to their part of speech</h2>
         {finished ? (
           <div>
-            <h1>The student rank is {score}</h1>
+            <h1>The student rank is {rank}</h1>
             <button onClick={() => tryAgain()}>Try again</button>
           </div>
         ) : (
           <div>
-            {/* ${resultFlag ? `correct` : `incorrect`} */}
+            <h1>Point of Speech</h1>
+            <h2>Categorize the words according to their part of speech</h2>
+
             <div>The word {questions[currentWord].word} is </div>
+
             <div className="answers">
               {pos.map((btn, index) => {
                 return (
@@ -170,114 +210,18 @@ function App() {
 
             <button onClick={() => next()}>Next word</button>
             <br />
-
-            <div>
-              <label>
-                You solve {currentWord + 1} question out of {questions.length}
-              </label>
-              <br />
-
-              <meter id="disk_d" value={currentWord / questions.length}></meter>
-            </div>
+            <ProgressBar
+              currentQuestionIndex={currentWord}
+              totalQuestionsCount={questions.length}
+            ></ProgressBar>          
           </div>
         )}
       </div>
     );
-    // return (
-    //   <ul>
-    //     {questions.map((item) => (
-    //       <li key={item.id}>{item.word}</li>
-    //     ))}
-    //   </ul>
-    // );
+ 
   }
 
-  // let pos = ["adverb", "verb", "adjective", "noun"];
-
-  // function next() {
-  //   setCurrentWord(currentWord + 1);
-  //   if (currentWord + 1 >= questions.length) {
-  //     setFinished(true);
-  //   }
-  //   setViewResult(false);
-  //   setHaveAnswered(false);
-  // }
-
-  // function tryAgain() {
-  //   setFinished(false);
-  //   setCurrentWord(0);
-  // }
-  // function selectedAnswer(e) {
-  //   setHaveAnswered(true);
-  //   if (e.currentTarget.getAttribute("value") === questions[currentWord].pos) {
-  //     setResultFlag(true);
-  //   } else {
-  //     setResultFlag(false);
-  //   }
-  //   setViewResult(true);
-  // }
-
-  // return (
-  //   <div className="App">
-  //     <h1>Point of Speech</h1>
-  //     <h2>Categorize the words according to their part of speech</h2>
-  //     {finished ? (
-  //       <div>
-  //         <h1>The student rank is 56.67</h1>
-  //         <button onClick={() => tryAgain()}>Try again</button>
-  //       </div>
-  //     ) : (
-  //       <div>
-  //         {/* ${resultFlag ? `correct` : `incorrect`} */}
-  //         <div>The word {questions[currentWord].word} is </div>
-  //         <div className="answers">
-  //           {pos.map((btn, index) => {
-  //             return (
-  //               <div
-  //                 key={index}
-  //                 value={btn}
-  //                 onClick={(e) =>
-  //                   haveAnswered ? e.preventDefault : selectedAnswer(e)
-  //                 }
-  //                 className={`answer ${
-  //                   haveAnswered
-  //                     ? resultFlag
-  //                       ? `correct`
-  //                       : `incorrect`
-  //                     : `answer`
-  //                 }`}
-  //               >
-  //                 {btn}
-  //               </div>
-  //             );
-  //           })}
-  //         </div>
-
-  //         {viewResult ? (
-  //           resultFlag ? (
-  //             <div>correct</div>
-  //           ) : (
-  //             <div>Wrong</div>
-  //           )
-  //         ) : (
-  //           <div></div>
-  //         )}
-
-  //         <button onClick={() => next()}>Next word</button>
-  //         <br />
-
-  //         <div>
-  //           <label>
-  //             You solve {currentWord + 1} question out of {questions.length}
-  //           </label>
-  //           <br />
-
-  //           <meter id="disk_d" value={currentWord / questions.length}></meter>
-  //         </div>
-  //       </div>
-  //     )}
-  //   </div>
-  // );
+  
 }
 
 export default App;

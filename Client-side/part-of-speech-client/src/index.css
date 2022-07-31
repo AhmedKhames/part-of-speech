@@ -87,17 +87,17 @@ body {
 }
 
 button {
-  width: 100%;
-  font-size: 16px;
-  color: #ffffff;
-  background-color: #252d4a;
-  border-radius: 15px;
-  display: flex;
-  padding: 5px;
-  justify-content: flex-start;
-  align-items: center;
-  border: 5px solid #234668;
+  background: #e8e8e8;
+  border: 0;
+  padding: 10px 20px;
   cursor: pointer;
+  border-bottom: 3px solid #c9c9c9;
+  border-radius: 3px;
+}
+
+button.next {
+  background: #6ad85c;
+  border-bottom: 3px solid #5abc4e;
 }
 
 .correct {
@@ -109,7 +109,7 @@ button {
 }
 
 button:hover {
-  background-color: #555e7d;
+  background-color: #6ad85c;
 }
 
 button:focus {
@@ -145,4 +145,32 @@ button svg {
 .answer.incorrect {
   background: #df3636;
   font-weight: bold;
+}
+
+
+.progressBar {
+  width: 100%;
+  background: #f3f3f3;
+  height: 20px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+}
+
+.progressBar .inner {
+  background: #6ad85c;
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  transition: ease all 0.5s;
+  border-radius: 3px;
+}
+
+.progressBar .text {
+  font-size: 0.7em;
+  position: absolute;
+  z-index: 10;
 }
