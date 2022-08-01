@@ -1,9 +1,8 @@
 import "./App.css";
 import { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 
+import { Result } from "./Components/Result";
+import { Quiz } from "./Components/Quiz";
 
 function App() {
   const [currentWord, setCurrentWord] = useState(0);
@@ -20,13 +19,13 @@ function App() {
 
   const [again, setAgain] = useState(false);
 
-  library.add(faCheck, faTimes);
+  let server = process.env.REACT_APP_API_SERVER;
 
   useEffect(() => {
     if (finished) {
       let totalScore = (score / questions.length) * 100;
-
-      fetch("http://localhost:8080/rank/", {
+      
+      fetch(`${server}/rank/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ score: totalScore }),
@@ -39,7 +38,7 @@ function App() {
   }, [finished ? true : null]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/words/")
+    fetch(`${server}/words/`)
       .then((res) => res.json())
       .then(
         (result) => {
@@ -85,7 +84,6 @@ function App() {
       setIsCorrect(false);
     }
   }
-  const progressPercentage = (currentWord / questions.length) * 100;
 
   if (error) {
     return <div>Error: {error.message}</div>;
@@ -95,113 +93,19 @@ function App() {
     return (
       <div className="App">
         {finished ? (
-          <div className="result_box">        
-            <div className="complete_text">You've completed the Quiz!</div>
-            <div className="score_text">
-              <span>Your rank is <p>{rank}</p> </span>
-            </div>
-            <div className="buttons">
-              <button className="restart" onClick={() => tryAgain()}>
-                Try Again
-              </button>
-            </div>
-          </div>
+          <Result rank={rank} tryAgain={tryAgain} />
         ) : (
-          <div className="quiz_box activeQuiz">
-            <header>
-              <div className="title">Point of Speech</div>
-              <div class="timer">
-                <div class="time_left_txt">Correct answers</div>
-                <div class="timer_sec">
-                  {score}
-                </div>
-              </div>
-              <div
-                className="time_line"
-                style={{ width: `${progressPercentage}%` }}
-              ></div>
-            </header>
-            <section>
-              <div className="que_text">
-                <span>
-                  {currentWord + 1}. The word {questions[currentWord].word} is
-                </span>
-              </div>
-              <div className="option_list">
-                {pos.map((answer, index) => {
-                  return (
-                    <div
-                      key={index}
-                      value={answer}
-                      onClick={(e) =>
-                        haveAnswered ? e.preventDefault : selectedAnswer(e)
-                      }
-                      className={`option ${
-                        haveAnswered
-                          ? index === selectedIdx
-                            ? isCorrect
-                              ? `correct disabled`
-                              : `incorrect disabled`
-                            : `disabled`
-                          : ``
-                      }`}
-                    >
-                      {haveAnswered ? (
-                        index === selectedIdx ? (
-                          isCorrect ? (
-                            <div>
-                              <FontAwesomeIcon icon="fa-solid fa-check" />
-                              {" " + answer}
-                            </div>
-                          ) : (
-                            <div>
-                              <FontAwesomeIcon icon="fa-solid fa-times" />
-                              {" " + answer}
-                            </div>
-                          )
-                        ) : (
-                          answer
-                        )
-                      ) : (
-                        answer
-                      )}
-                      
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-            <footer>
-              <div className="total_que">
-                <span>
-                  <p> {currentWord + 1} </p> of <p> {questions.length}</p>{" "}
-                  Questions
-                </span>
-              </div>
-
-             
-              <button onClick={() => next()} className={currentWord  === questions.length -1?`submit`:''}>
-              {currentWord + 1 < questions.length?`Next Word`:'Submit'}
-              </button>
-            </footer>
-
-            {/* {haveAnswered ? (
-              isCorrect ? (
-                <div>correct</div>
-              ) : (
-                <div>Wrong</div>
-              )
-            ) : (
-              <div></div>
-            )} */}
-            {/* 
-            <button onClick={() => next()}>Next word</button>
-            <br />
-            <ProgressBar
-              currentQuestionIndex={currentWord}
-              totalQuestionsCount={questions.length}
-            ></ProgressBar> */}
-          </div>
+          <Quiz
+            currentWord={currentWord}
+            questions={questions}
+            score={score}
+            haveAnswered={haveAnswered}
+            selectedAnswer={selectedAnswer}
+            selectedIdx={selectedIdx}
+            isCorrect={isCorrect}
+            next={next}
+            pos={pos}
+          />
         )}
       </div>
     );

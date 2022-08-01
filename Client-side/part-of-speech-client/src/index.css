@@ -61,7 +61,7 @@ body{
     font-weight: 600;
 }
 
-.quiz_box header .timer{
+.quiz_box header .progress{
     color: #004085;
     background: #cce5ff;
     border: 1px solid #b8daff;
@@ -74,13 +74,13 @@ body{
     width: 210px;
 }
 
-.quiz_box header .timer .time_left_txt{
+.quiz_box header .progress .questions_left_txt{
     font-weight: 400;
     font-size: 17px;
     user-select: none;
 }
 
-.quiz_box header .timer .timer_sec{
+.quiz_box header .progress .progress_left{
     font-size: 18px;
     font-weight: 500;
     height: 30px;
@@ -94,7 +94,7 @@ body{
     user-select: none;
 }
 
-.quiz_box header .time_line{
+.quiz_box header .progress_bar{
     position: absolute;
     bottom: 0px;
     left: 0px;
@@ -172,7 +172,6 @@ section .option_list .option .icon{
     color: #23903c;
     border-color: #23903c;
     background: #d4edda;
-    
 }
 
 .option_list .option .icon.cross{
