@@ -1,4 +1,6 @@
+// the result panal which appears after complete the activity
 function Result(props) {
+
   return (
     <div className="result_box">
       <div className="complete_text">You've completed the Quiz!</div>

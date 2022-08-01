@@ -8,14 +8,17 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
 
+// middleware to allow CORS from all origins , allow get and post methods 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
-  res.setHeader("Access-Control-Allow-Headers","Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST");
+  res.setHeader("Access-Control-Allow-Headers","Content-Type");
   next();
 });
 
+// to parse json body
 app.use(bodyParser.json());
+
 app.get("/words", getWords);
 app.post("/rank", calculateRank);
 
