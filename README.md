@@ -26,5 +26,8 @@ To run the application the repository contains two folders :
         3. Run `npm start` to start the application on port 3000 by default.
     - To change the domain of the REST api go to `.env` inside `part-of-speech-client` folder and change it.
 
+## Deployment
+- You can check the application on: 
+    >https://part-of-speech-v1.herokuapp.com/
          
    
