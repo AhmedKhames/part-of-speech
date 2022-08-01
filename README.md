@@ -21,9 +21,10 @@ To run the application the repository contains two folders :
 
 - Client-side 
     - React application 
-        1. Go to Server-side folder using `cd Client-side\part-of-speech-client\`
+        1. Go to part-of-speech-client folder using `cd Client-side\part-of-speech-client\`
         2. Run `npm install` to install dependances.
         3. Run `npm start` to start the application on port 3000 by default.
+        
     - To change the domain of the REST api go to `.env` inside `part-of-speech-client` folder and change it.
 
 ## Deployment
